@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import pickle
 import numpy as np
+from flask_cors import CORS
 
 # Load the trained model and scalers
 randclf = pickle.load(open('model.pkl', 'rb'))
@@ -8,16 +9,18 @@ mx = pickle.load(open('minmaxscaler.pkl', 'rb'))
 sc = pickle.load(open('standscaler.pkl', 'rb'))
 
 app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return "Crop Recommendation API"
+CORS(app)  # Enable CORS
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Get form data instead of JSON
-        data = request.form
+        # Check if request is JSON or form-data
+        if request.is_json:
+            data = request.get_json()
+            print("Received JSON:", data)
+        else:
+            data = request.form
+            print("Received Form Data:", data)
 
         # Validate required fields
         required_fields = ['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall']
@@ -39,12 +42,7 @@ def predict():
         return jsonify({'predicted_label': prediction[0]})
     
     except Exception as e:
-        return jsonify({'error': str(e)}), 400  # Return HTTP 400 for bad requests
-
-# Handle 404 errors
-@app.errorhandler(404)
-def not_found(error):
-    return jsonify({'error': 'Endpoint not found'}), 404
+        return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
