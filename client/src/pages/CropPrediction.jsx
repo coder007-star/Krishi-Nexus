@@ -80,7 +80,9 @@ const CropPrediction = () => {
       <form onSubmit={handleSubmit} className="space-y-2">
         {Object.keys(formData).map((key) => (
           <div key={key} className="flex items-center gap-2">
-            <label className="text-gray-700 font-medium capitalize w-24">{key} :</label>
+            <label className="text-gray-700 font-medium capitalize w-24">
+              {key} :
+            </label>
             <div className="flex-1">
               <input
                 type="text"
@@ -94,25 +96,45 @@ const CropPrediction = () => {
                 }`}
                 style={{ appearance: "none" }}
               />
-              {errors[key] && <p className="text-red-500 text-sm">{errors[key]}</p>}
+              {errors[key] && (
+                <p className="text-red-500 text-sm">{errors[key]}</p>
+              )}
             </div>
           </div>
         ))}
 
         <button
           type="submit"
-          className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-all mt-3"
+          className={`w-full py-2 rounded-md transition-all mt-3 ${
+            loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700 text-white"
+          }`}
           disabled={loading}
         >
-          {loading ? "Predicting..." : "Get Prediction"}
+          {loading ? (
+            <span className="flex items-center justify-center">
+              <svg
+                className="animate-spin h-5 w-5 mr-2 border-t-2 border-white rounded-full"
+                viewBox="0 0 24 24"
+              ></svg>
+              Predicting...
+            </span>
+          ) : (
+            "Get Prediction"
+          )}
         </button>
       </form>
 
       {error && <p className="text-red-500 mt-3 text-center">{error}</p>}
 
       {prediction && (
-        <div className="mt-4 p-3 bg-green-100 text-green-700 font-semibold text-center rounded-md">
-          Recommended Crop: {prediction}
+        <div className="mt-4 p-4 bg-green-100 text-green-700 font-semibold text-center rounded-md shadow-md">
+          <p className="mb-2">Recommended Crop: {prediction}</p>
+          <a
+            href={`/crop/${prediction.toLowerCase()}`} // Dynamically generating the URL
+            className="inline-block px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300"
+          >
+            View Cultivation Guide
+          </a>
         </div>
       )}
     </div>

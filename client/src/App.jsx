@@ -5,6 +5,7 @@ import CropPrediction from "./pages/CropPrediction";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Weather from "./pages/Weather";
+import CropDetails from "./pages/CropDetails";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
+            <Route path="/crop/:id" element={<CropDetails />} />
             <Route path="/crop" element={<CropPrediction />} />
             <Route path="/weather" element={<Weather />} />
           </Routes>
