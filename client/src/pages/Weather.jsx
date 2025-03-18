@@ -123,7 +123,9 @@ const Weather = () => {
                 alt={item.weather[0].description}
                 className="h-12"
               />
-              <p className="text-lg font-medium">{item.dt_txt.split(" ")[0]}</p>
+              <p className="text-lg font-medium">
+                {item.dt_txt.split(" ")[0].split("-").reverse().join("-")}
+              </p>
               <p className="text-sm text-gray-600">{item.main.temp}°C</p>
               <p className="text-xs text-gray-500">
                 {item.weather[0].description}
