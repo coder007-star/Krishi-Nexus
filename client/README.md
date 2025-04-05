@@ -59,3 +59,69 @@ Why should data fetching be done inside `useEffect` and not directly in the body
 >  Ab ek aur aayega dimag is loading sate ko bhi useState ke bina kare. toh tumara internally data toh ho jayega , but UI pr reflect nahi hoga waha pr toh *data is loading* hi show karega. Kyoki useState ka theory padho wo kya bolta hai, ki toh changing data ko show karna hai toh, component re-render karna padega. aur component kis data ke change hone pr re-render ho wahi toh useState batata hai.
 
 > Agar bina `useEffect` ke fetch call karoge, toh **har re-render pe** naya fetch request jayega, jo **network overload** aur **performance issue** create karega. Isliye **`useEffect` ka use karke dependency array `[ ]` pass karte hain** taki fetch **sirf ek baar ho** (component mount hone par). 
+
+
+---
+
+### **What problem occurred?**
+
+**Problem Name: "Component not re-fetching data after 404 error"**
+
+The issue occurred when a crop search returned a `404 Not Found` error. After this error, subsequent searches would not trigger a re-fetch of the crop data. This happened because the error state (`error`) was set when the `404` occurred, and React didn’t know to clear this state when a new crop search was performed. As a result, the component remained in the error state and didn’t attempt to fetch data for the new search, causing it to not re-render correctly and display the updated crop information.
+
+---
+
+### **How was it fixed?**
+
+1. **Resetting the error state on new search:**
+   - When a user performs a search, the error state (`setError(null)`) is reset to ensure that the component no longer stays in the error state from a previous search. This allows the component to attempt fetching data for the new search.
+
+2. **Clearing the previous crop data and resetting the loading state:**
+   - Before initiating a new fetch request, the component clears the previous crop data (`setCrop(null)`) and resets the loading state (`setLoading(true)`), ensuring that the component starts fresh with each new search.
+
+3. **Ensuring the component properly re-fetches the data:**
+   - The `useEffect` hook is set up to trigger a re-fetch of the crop data every time the `id` (crop search) changes. This ensures that new data is fetched and displayed, even after an error like `404`, by properly re-setting the state.
+
+
+
+### **Code Changes**:
+
+- **Reset the error state on search**:
+  ```js
+  const handleSearch = () => {
+    if (search.trim() !== "") {
+      setError(null); // Reset the error state before navigating
+      navigate(`/crop/${search.trim().toLowerCase()}`);
+    }
+  };
+  ```
+
+- **Clear previous crop data and reset loading state**:
+  ```js
+  useEffect(() => {
+    setCrop(null);  // Clear the previous crop data
+    setLoading(true); // Set loading state back to true
+    setError(null);   // Reset the error state
+
+    fetch(`${VITE_BACKEND_API}/api/cultivation/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Crop data not found.");
+        return res.json();
+      })
+      .then((data) => {
+        if (!data.crop) throw new Error("Crop details will be available soon.");
+        setCrop(data.crop);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);  // Set the error message
+        setLoading(false);      // End loading
+      });
+  }, [id]);
+  ```
+
+### **Result**:
+With these changes, the application now properly resets the error state and fetches new data whenever the user performs a new search, even if the previous search resulted in a `404` error.
+
+---
+
